@@ -20,8 +20,8 @@
         "showProgressBar": true,
         "showLogo": true
       },
-      "sequenceCounter": 2,
-      "totalScans": 2,
+      "sequenceCounter": 3,
+      "totalScans": 3,
       "createdAt": "2026-08-16T16:06:50.589Z",
       "links": [
         {
@@ -47,7 +47,7 @@
           "title": "Quiz Webpage 3",
           "url": "https://example.com/quiz-3",
           "active": true,
-          "clicks": 0,
+          "clicks": 1,
           "weight": 1,
           "maxScans": 0
         },
@@ -71,6 +71,17 @@
         }
       ],
       "scanLogs": [
+        {
+          "id": "log-1786988351854-6a6",
+          "timestamp": "2026-08-17T17:39:11.855Z",
+          "scanIndex": 3,
+          "assignedIndex": 3,
+          "linkId": "link-3",
+          "linkTitle": "Quiz Webpage 3",
+          "targetUrl": "https://example.com/quiz-3",
+          "ip": "127.0.0.1",
+          "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.9168"
+        },
         {
           "id": "log-1786896445846-ih5",
           "timestamp": "2026-08-16T16:07:25.846Z",

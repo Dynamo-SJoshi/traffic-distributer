@@ -17,6 +17,17 @@ const DEFAULT_DATA = {
       redirectBehavior: 'splash_1s', // 'splash_1s' | 'instant_302'
       splashMessage: 'Allocating your webpage...',
       logoUrl: '/logo.jpg',
+      splashSettings: {
+        headline: 'Allocating your webpage...',
+        subtext: 'Opening your assigned destination link',
+        logoUrl: '/logo.jpg',
+        delaySeconds: 1.0,
+        theme: 'dark_cyber',
+        showBadge: true,
+        showTargetPill: true,
+        showProgressBar: true,
+        showLogo: true
+      },
       sequenceCounter: 0,
       totalScans: 0,
       createdAt: new Date().toISOString(),
@@ -75,7 +86,10 @@ const DEFAULT_DATA = {
 class JSONDatabase {
   constructor() {
     this.data = { campaigns: [] };
+    this.saveTimeout = null;
+    this.dirty = false;
     this.init();
+    this.setupExitHandlers();
   }
 
   init() {
@@ -86,21 +100,58 @@ class JSONDatabase {
         if (!this.data.campaigns) this.data.campaigns = [];
       } else {
         this.data = DEFAULT_DATA;
-        this.save();
+        this.saveSync();
       }
     } catch (err) {
       console.error('Error reading JSON DB, initializing default data:', err);
       this.data = DEFAULT_DATA;
-      this.save();
+      this.saveSync();
     }
   }
 
-  save() {
+  // Synchronous immediate save (for campaign creation/deletion)
+  saveSync() {
     try {
+      if (this.saveTimeout) {
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = null;
+      }
       fs.writeFileSync(DB_PATH, JSON.stringify(this.data, null, 2), 'utf-8');
+      this.dirty = false;
     } catch (err) {
-      console.error('Error saving DB:', err);
+      console.error('Error saving DB synchronously:', err);
     }
+  }
+
+  // Optimized Debounced Asynchronous Save (Zero event-loop blocking for incoming scans)
+  scheduleSave(immediate = false) {
+    if (immediate) {
+      this.saveSync();
+      return;
+    }
+
+    this.dirty = true;
+    if (!this.saveTimeout) {
+      this.saveTimeout = setTimeout(() => {
+        this.saveTimeout = null;
+        if (this.dirty) {
+          fs.writeFile(DB_PATH, JSON.stringify(this.data, null, 2), 'utf-8', (err) => {
+            if (err) console.error('Error saving DB asynchronously:', err);
+            else this.dirty = false;
+          });
+        }
+      }, 1000); // Debounce to flush background writes once per second
+    }
+  }
+
+  setupExitHandlers() {
+    const saveOnExit = () => {
+      if (this.dirty) {
+        this.saveSync();
+      }
+    };
+    process.on('SIGINT', () => { saveOnExit(); process.exit(0); });
+    process.on('SIGTERM', () => { saveOnExit(); process.exit(0); });
   }
 
   getCampaigns() {
@@ -141,7 +192,7 @@ class JSONDatabase {
       scanLogs: []
     };
     this.data.campaigns.push(newCampaign);
-    this.save();
+    this.scheduleSave(true);
     return newCampaign;
   }
 
@@ -149,7 +200,7 @@ class JSONDatabase {
     const campaign = this.getCampaignById(id);
     if (!campaign) return null;
     Object.assign(campaign, updateData);
-    this.save();
+    this.scheduleSave(true);
     return campaign;
   }
 
@@ -157,13 +208,13 @@ class JSONDatabase {
     const index = this.data.campaigns.findIndex((c) => c.id === id);
     if (index !== -1) {
       this.data.campaigns.splice(index, 1);
-      this.save();
+      this.scheduleSave(true);
       return true;
     }
     return false;
   }
 
-  // Next link calculator & scan event recorder
+  // Next link calculator & scan event recorder (HIGH THROUGHPUT IN-MEMORY ALLOCATION)
   getNextLinkAndAllocate(idOrCode, visitorInfo = {}) {
     const campaign = this.getCampaignById(idOrCode);
     if (!campaign) return { error: 'Campaign not found' };
@@ -209,7 +260,7 @@ class JSONDatabase {
       campaign.sequenceCounter = (campaign.sequenceCounter || 0) + 1;
     }
 
-    // Update link clicks & total scans
+    // Update link clicks & total scans in RAM
     selectedLink.clicks = (selectedLink.clicks || 0) + 1;
     campaign.totalScans = (campaign.totalScans || 0) + 1;
 
@@ -235,7 +286,8 @@ class JSONDatabase {
       campaign.scanLogs = campaign.scanLogs.slice(0, 200);
     }
 
-    this.save();
+    // Non-blocking debounced background save
+    this.scheduleSave(false);
 
     return {
       campaign,
@@ -253,7 +305,7 @@ class JSONDatabase {
     campaign.totalScans = 0;
     campaign.scanLogs = [];
     campaign.links.forEach((l) => (l.clicks = 0));
-    this.save();
+    this.scheduleSave(true);
     return campaign;
   }
 }
