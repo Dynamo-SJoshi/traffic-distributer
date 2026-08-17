@@ -1,0 +1,99 @@
+{
+  "campaigns": [
+    {
+      "id": "camp-1786896410589",
+      "shortCode": "kj29l",
+      "title": "Navaarambh",
+      "description": "ancu",
+      "strategy": "round_robin",
+      "redirectBehavior": "instant_302",
+      "splashMessage": "Allocating your webpage...",
+      "logoUrl": "/logo.jpg",
+      "splashSettings": {
+        "headline": "Allocating your webpage...",
+        "subtext": "Opening your assigned destination link",
+        "logoUrl": "/logo.jpg",
+        "delaySeconds": 1,
+        "theme": "dark_cyber",
+        "showBadge": true,
+        "showTargetPill": true,
+        "showProgressBar": true,
+        "showLogo": true
+      },
+      "sequenceCounter": 2,
+      "totalScans": 2,
+      "createdAt": "2026-08-16T16:06:50.589Z",
+      "links": [
+        {
+          "id": "link-1",
+          "title": "Quiz Webpage 1",
+          "url": "https://example.com/quiz-1",
+          "active": true,
+          "clicks": 1,
+          "weight": 1,
+          "maxScans": 0
+        },
+        {
+          "id": "link-2",
+          "title": "Quiz Webpage 2",
+          "url": "https://example.com/quiz-2",
+          "active": true,
+          "clicks": 1,
+          "weight": 1,
+          "maxScans": 0
+        },
+        {
+          "id": "link-3",
+          "title": "Quiz Webpage 3",
+          "url": "https://example.com/quiz-3",
+          "active": true,
+          "clicks": 0,
+          "weight": 1,
+          "maxScans": 0
+        },
+        {
+          "id": "link-4",
+          "title": "Quiz Webpage 4",
+          "url": "https://example.com/quiz-4",
+          "active": true,
+          "clicks": 0,
+          "weight": 1,
+          "maxScans": 0
+        },
+        {
+          "id": "link-5",
+          "title": "Quiz Webpage 5",
+          "url": "https://example.com/quiz-5",
+          "active": true,
+          "clicks": 0,
+          "weight": 1,
+          "maxScans": 0
+        }
+      ],
+      "scanLogs": [
+        {
+          "id": "log-1786896445846-ih5",
+          "timestamp": "2026-08-16T16:07:25.846Z",
+          "scanIndex": 2,
+          "assignedIndex": 2,
+          "linkId": "link-2",
+          "linkTitle": "Quiz Webpage 2",
+          "targetUrl": "https://example.com/quiz-2",
+          "ip": "::1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+        },
+        {
+          "id": "log-1786896442949-teu",
+          "timestamp": "2026-08-16T16:07:22.949Z",
+          "scanIndex": 1,
+          "assignedIndex": 1,
+          "linkId": "link-1",
+          "linkTitle": "Quiz Webpage 1",
+          "targetUrl": "https://example.com/quiz-1",
+          "ip": "::1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+        }
+      ]
+    }
+  ]
+}
