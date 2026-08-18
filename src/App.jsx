@@ -3,16 +3,22 @@ import Navbar from './components/Navbar';
 import CampaignList from './components/CampaignList';
 import CampaignDetail from './components/CampaignDetail';
 import CreateCampaignModal from './components/CreateCampaignModal';
+import PasscodeGate from './components/PasscodeGate';
 
 export default function App() {
+  const [passcode, setPasscode] = useState(() => localStorage.getItem('qroute_passcode') || '');
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (pCode = passcode) => {
+    if (!pCode) return;
+    setLoading(true);
     try {
-      const res = await fetch('/api/campaigns');
+      const res = await fetch('/api/campaigns', {
+        headers: { 'X-Passcode': pCode }
+      });
       if (res.ok) {
         const data = await res.json();
         setCampaigns(data);
@@ -25,20 +31,37 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchCampaigns();
-  }, []);
+    if (passcode) {
+      fetchCampaigns(passcode);
+    }
+  }, [passcode]);
+
+  const handleLoginSuccess = (validPasscode) => {
+    localStorage.setItem('qroute_passcode', validPasscode);
+    setPasscode(validPasscode);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('qroute_passcode');
+    setPasscode('');
+    setCampaigns([]);
+    setSelectedCampaignId(null);
+  };
 
   const handleCreateCampaign = async (campaignData) => {
     try {
       const res = await fetch('/api/campaigns', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Passcode': passcode
+        },
         body: JSON.stringify(campaignData)
       });
       if (res.ok) {
         const created = await res.json();
         setShowCreateModal(false);
-        await fetchCampaigns();
+        await fetchCampaigns(passcode);
         setSelectedCampaignId(created.id);
       }
     } catch (err) {
@@ -48,10 +71,13 @@ export default function App() {
 
   const handleDeleteCampaign = async (id) => {
     try {
-      const res = await fetch(`/api/campaigns/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/campaigns/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Passcode': passcode }
+      });
       if (res.ok) {
         if (selectedCampaignId === id) setSelectedCampaignId(null);
-        fetchCampaigns();
+        fetchCampaigns(passcode);
       }
     } catch (err) {
       console.error('Failed to delete campaign:', err);
@@ -59,6 +85,11 @@ export default function App() {
   };
 
   const activeCampaign = campaigns.find((c) => c.id === selectedCampaignId);
+
+  // If user is not authenticated with a 6-character passcode, show PasscodeGate screen
+  if (!passcode) {
+    return <PasscodeGate onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -68,6 +99,8 @@ export default function App() {
         onNewCampaign={() => setShowCreateModal(true)}
         activeCampaignId={selectedCampaignId}
         onSelectCampaign={setSelectedCampaignId}
+        passcode={passcode}
+        onLogout={handleLogout}
       />
 
       <main style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '0 28px 60px', flex: 1 }}>
@@ -79,7 +112,7 @@ export default function App() {
           <CampaignDetail
             campaign={activeCampaign}
             onBack={() => setSelectedCampaignId(null)}
-            onRefresh={fetchCampaigns}
+            onRefresh={() => fetchCampaigns(passcode)}
           />
         ) : (
           <CampaignList
@@ -97,10 +130,6 @@ export default function App() {
           onCreate={handleCreateCampaign}
         />
       )}
-
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: '20px 28px', textAlign: 'center', fontSize: '13px', color: 'var(--text-muted)' }}>
-        QRoute Sequential QR Link Allocator & Rotator &bull; Engineered with Node.js & React
-      </footer>
 
     </div>
   );

@@ -298,6 +298,30 @@ function normalizeImageUrl(url) {
 }
 
 // ----------------------------------------------------
+// AUTH & PASSCODE ROUTES
+// ----------------------------------------------------
+
+// Verify Passcode Login
+app.post('/api/auth/verify', (req, res) => {
+  const { passcode } = req.body;
+  const result = db.verifyOrRegisterPasscode(passcode, false);
+  if (!result.valid) {
+    return res.status(401).json({ error: result.error });
+  }
+  res.json(result);
+});
+
+// Register New Account (6-character passcode)
+app.post('/api/auth/register', (req, res) => {
+  const { passcode } = req.body;
+  const result = db.verifyOrRegisterPasscode(passcode, true);
+  if (!result.valid) {
+    return res.status(400).json({ error: result.error });
+  }
+  res.status(201).json(result);
+});
+
+// ----------------------------------------------------
 // REST API ROUTES
 // ----------------------------------------------------
 
@@ -313,9 +337,10 @@ app.get('/api/network-ip', (req, res) => {
   });
 });
 
-// Get all campaigns
+// Get campaigns for authenticated passcode
 app.get('/api/campaigns', (req, res) => {
-  res.json(db.getCampaigns());
+  const passcode = req.headers['x-passcode'] || req.query.passcode || '123456';
+  res.json(db.getCampaigns(passcode));
 });
 
 // Get campaign detail
@@ -327,7 +352,8 @@ app.get('/api/campaigns/:id', (req, res) => {
 
 // Create campaign
 app.post('/api/campaigns', (req, res) => {
-  const newCamp = db.createCampaign(req.body);
+  const passcode = req.headers['x-passcode'] || req.query.passcode || '123456';
+  const newCamp = db.createCampaign(req.body, passcode);
   res.status(201).json(newCamp);
 });
 

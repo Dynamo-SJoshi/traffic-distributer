@@ -1,7 +1,7 @@
 import React from 'react';
-import { QrCode, Plus, Layers, Zap, Activity } from 'lucide-react';
+import { QrCode, Plus, Layers, Zap, Activity, ShieldCheck, LogOut } from 'lucide-react';
 
-export default function Navbar({ campaigns = [], onNewCampaign, activeCampaignId, onSelectCampaign }) {
+export default function Navbar({ campaigns = [], onNewCampaign, activeCampaignId, onSelectCampaign, passcode, onLogout }) {
   const totalScansAll = campaigns.reduce((acc, c) => acc + (c.totalScans || 0), 0);
 
   return (
@@ -28,17 +28,36 @@ export default function Navbar({ campaigns = [], onNewCampaign, activeCampaignId
           </div>
         </div>
 
-        {/* Global Stats Badges */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div className="badge badge-cyan" style={{ padding: '8px 14px', fontSize: '13px' }}>
-            <Layers size={14} />
-            <span>{campaigns.length} Active Campaigns</span>
+        {/* Global Stats & Account Info Badges */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div className="badge badge-cyan" style={{ padding: '6px 12px', fontSize: '12px' }}>
+            <Layers size={13} />
+            <span>{campaigns.length} Campaigns</span>
           </div>
 
-          <div className="badge badge-emerald" style={{ padding: '8px 14px', fontSize: '13px' }}>
-            <Activity size={14} />
-            <span>{totalScansAll} Total Scans Logged</span>
+          <div className="badge badge-emerald" style={{ padding: '6px 12px', fontSize: '12px' }}>
+            <Activity size={13} />
+            <span>{totalScansAll} Scans</span>
           </div>
+
+          {/* Passcode Account Indicator & Logout */}
+          {passcode && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)', padding: '4px 6px 4px 12px', borderRadius: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#a5b4fc', fontWeight: 'bold' }}>
+                <ShieldCheck size={14} color="#818cf8" />
+                <span>Passcode: <code style={{ color: '#fff', fontSize: '13px' }}>{passcode}</code></span>
+              </div>
+              
+              <button
+                className="btn btn-secondary btn-sm"
+                style={{ padding: '4px 8px', fontSize: '11px', height: '26px' }}
+                onClick={onLogout}
+                title="Lock Dashboard & Logout"
+              >
+                <LogOut size={12} /> Lock
+              </button>
+            </div>
+          )}
 
           {/* Create Button */}
           <button className="btn btn-primary" onClick={onNewCampaign}>
