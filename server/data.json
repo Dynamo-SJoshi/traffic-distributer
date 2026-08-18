@@ -68,6 +68,15 @@
           "clicks": 0,
           "weight": 1,
           "maxScans": 0
+        },
+        {
+          "id": "link-1787079042015",
+          "title": "Test Added Link",
+          "url": "https://example.com/test-added",
+          "active": true,
+          "clicks": 0,
+          "weight": 1,
+          "maxScans": 0
         }
       ],
       "scanLogs": [
@@ -104,7 +113,14 @@
           "ip": "::1",
           "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
         }
-      ]
+      ],
+      "passcode": "123456"
+    }
+  ],
+  "accounts": [
+    {
+      "passcode": "123456",
+      "createdAt": "2026-08-18T18:50:41.259Z"
     }
   ]
 }

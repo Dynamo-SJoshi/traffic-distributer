@@ -388,7 +388,7 @@ app.post('/api/campaigns/:id/links', (req, res) => {
   };
 
   campaign.links.push(newLink);
-  db.save();
+  db.scheduleSave(true);
   res.status(201).json(newLink);
 });
 
@@ -401,7 +401,7 @@ app.put('/api/campaigns/:id/links/:linkId', (req, res) => {
   if (!link) return res.status(404).json({ error: 'Link not found' });
 
   Object.assign(link, req.body);
-  db.save();
+  db.scheduleSave(true);
   res.json(link);
 });
 
@@ -414,7 +414,7 @@ app.delete('/api/campaigns/:id/links/:linkId', (req, res) => {
   if (index === -1) return res.status(404).json({ error: 'Link not found' });
 
   campaign.links.splice(index, 1);
-  db.save();
+  db.scheduleSave(true);
   res.json({ success: true });
 });
 
@@ -442,7 +442,7 @@ app.post('/api/campaigns/:id/reorder', (req, res) => {
       if (!reordered.includes(l)) reordered.push(l);
     });
     campaign.links = reordered;
-    db.save();
+    db.scheduleSave(true);
   }
   res.json(campaign);
 });

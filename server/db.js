@@ -124,6 +124,11 @@ class JSONDatabase {
     }
   }
 
+  // Legacy save alias
+  save() {
+    this.scheduleSave(true);
+  }
+
   // Synchronous immediate save (for campaign creation/deletion)
   saveSync() {
     try {
